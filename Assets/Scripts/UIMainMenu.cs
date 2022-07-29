@@ -13,10 +13,20 @@ public class UIMainMenu : MonoBehaviour
     public Button startButton;
     public InputField inputName;
     public Text warningText;
+    public Text highScoreText;
     private bool hasName = false;
 
     void Start() {
         inputName.onValueChanged.AddListener(delegate {ValueChangeCheck(); });
+
+        if (PersistManager.Instance != null) {
+            string name = PersistManager.Instance.PlayerName;
+            int score = PersistManager.Instance.HighScore;
+
+            if (score > 0) {
+                highScoreText.text = $"Best Score - {name}: {score}";
+            }
+        }
     }
 
     public void ValueChangeCheck()
@@ -24,6 +34,7 @@ public class UIMainMenu : MonoBehaviour
         // Debug.Log("Value Changed: " + inputName.text.Length );
         if (inputName.text.Length >= 3) {
             hasName = true;
+            PersistManager.Instance.currentPlayer = inputName.text;
         } else {
             hasName = false;
         }
@@ -35,6 +46,10 @@ public class UIMainMenu : MonoBehaviour
         } else {
             warningText.gameObject.SetActive(true);
         }
+    }
+
+    public void ShowLeaderboard() {
+        SceneManager.LoadScene(2);
     }
 
     public void Exit() {

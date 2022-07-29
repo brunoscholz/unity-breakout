@@ -11,20 +11,34 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text HighScoreText;
     public GameObject GameOverText;
-    
+
     private bool m_Started = false;
     private int m_Points;
-    
+
     private bool m_GameOver = false;
 
-    
+    private string PlayerName;
+    private int HighScore;
+    private string currentPlayer = "";
+
+
     // Start is called before the first frame update
     void Start()
     {
+        if (PersistManager.Instance != null)
+        {
+            currentPlayer = PersistManager.Instance.currentPlayer;
+            PlayerName = PersistManager.Instance.PlayerName;
+            HighScore = PersistManager.Instance.HighScore;
+            SetHighScore();
+            AddPoint(0);
+        }
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
+
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
         {
@@ -62,15 +76,35 @@ public class MainManager : MonoBehaviour
         }
     }
 
+    void SetHighScore() {
+        HighScoreText.text = $"Best Score : {PlayerName} : {HighScore}";
+    }
+
     void AddPoint(int point)
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (currentPlayer != "") {
+            ScoreText.text = $"{currentPlayer}'s {ScoreText.text}";
+        }
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (m_Points >= HighScore) {
+            PlayerName = currentPlayer;
+            HighScore = m_Points;
+            // PersistManager.Instance.PlayerName = PlayerName;
+            // PersistManager.Instance.HighScore = HighScore;
+            PersistManager.Instance.SaveScore(PlayerName, HighScore);
+        }
+
+        SetHighScore();
+    }
+
+    public void Exit() {
+        SceneManager.LoadScene(0);
     }
 }

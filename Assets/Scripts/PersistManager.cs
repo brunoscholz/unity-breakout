@@ -3,28 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class SaveData
+{
+    public string playerName;
+    public int score;
+}
+
 public class PersistManager : MonoBehaviour
 {
     public static PersistManager Instance;
 
+    public List<SaveData> scores;
     public string PlayerName;
-    public string HighScore;
+    public int HighScore;
+    public string currentPlayer;
 
-    [System.Serializable]
-    class SaveData
+    public void SaveScore(string m_playerName, int m_highScore)
     {
-        public string PlayerName;
-        public string HighScore;
-    }
+        SaveData newData = new SaveData();
+        newData.playerName = m_playerName;
+        newData.score = m_highScore;
 
-    public void SaveScore()
-    {
-        SaveData data = new SaveData();
-        data.PlayerName = PlayerName;
-        data.HighScore = HighScore;
+        scores.Add(newData);
+        scores.Sort(SortByScore);
 
-        string json = JsonUtility.ToJson(data);
+        SaveData[] data = scores.ToArray();
+        PlayerName = data[0].playerName;
+        HighScore = data[0].score;
 
+        // string json = JsonUtility.ToJson(data);
+        string json = JsonHelper.ToJson(data);
         File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
     }
 
@@ -34,10 +43,17 @@ public class PersistManager : MonoBehaviour
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
-            SaveData data = JsonUtility.FromJson<SaveData>(json);
+            // SaveData data = JsonUtility.FromJson<SaveData>(json);
+            SaveData[] data = JsonHelper.FromJson<SaveData>(json);
 
-            PlayerName = data.PlayerName;
-            HighScore = data.HighScore;
+            if (data.Length > 0) {
+              scores = new List<SaveData>(data);
+              PlayerName = data[0].playerName;
+              HighScore = data[0].score;
+            } else {
+                PlayerName = "";
+                HighScore = 0;
+            }
         }
     }
 
@@ -54,5 +70,10 @@ public class PersistManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         LoadScore();
+    }
+
+    static int SortByScore(SaveData p1, SaveData p2)
+    {
+        return p2.score.CompareTo(p1.score);
     }
 }
