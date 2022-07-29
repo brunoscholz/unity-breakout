@@ -96,10 +96,8 @@ public class MainManager : MonoBehaviour
         if (m_Points >= HighScore) {
             PlayerName = currentPlayer;
             HighScore = m_Points;
-            // PersistManager.Instance.PlayerName = PlayerName;
-            // PersistManager.Instance.HighScore = HighScore;
-            PersistManager.Instance.SaveScore(PlayerName, HighScore);
         }
+        PersistManager.Instance.SaveScore(currentPlayer, m_Points);
 
         SetHighScore();
     }
