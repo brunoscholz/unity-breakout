@@ -12,12 +12,14 @@ public class SaveData
 
 public class PersistManager : MonoBehaviour
 {
-    public static PersistManager Instance;
+    // ENCAPSULATION
+    public static PersistManager Instance { get; private set; }
 
     public List<SaveData> scores;
     public string PlayerName;
     public int HighScore;
     public string currentPlayer;
+    public int currentLevel = 1;
 
     public void SaveScore(string m_playerName, int m_highScore)
     {
