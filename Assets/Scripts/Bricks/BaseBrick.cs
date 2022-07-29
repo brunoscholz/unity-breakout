@@ -4,19 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+// INHERITANCE
 public class BaseBrick : MonoBehaviour
 {
-    // public UnityEvent<int> onDestroyed;
-
+    // POLYMORPHISM and ENCAPSULATION
     public virtual string brickName { get; }
     public virtual int pointValue { get; }
     public virtual Color color { get { return Color.red; } }
     public event Action<int> onDestroyed = delegate { };
-
-    void Start()
-    {
-        // SetColor();
-    }
 
     protected void SetColor()
     {
@@ -24,21 +19,6 @@ public class BaseBrick : MonoBehaviour
 
         MaterialPropertyBlock block = new MaterialPropertyBlock();
         block.SetColor("_BaseColor", color);
-        // switch (PointValue)
-        // {
-        //     case 1 :
-        //         block.SetColor("_BaseColor", Color.green);
-        //         break;
-        //     case 2:
-        //         block.SetColor("_BaseColor", Color.yellow);
-        //         break;
-        //     case 5:
-        //         block.SetColor("_BaseColor", Color.blue);
-        //         break;
-        //     default:
-        //         block.SetColor("_BaseColor", new Color(25, 64, 128));
-        //         break;
-        // }
         renderer.SetPropertyBlock(block);
     }
 

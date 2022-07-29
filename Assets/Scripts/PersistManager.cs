@@ -20,6 +20,7 @@ public class PersistManager : MonoBehaviour
     public int HighScore;
     public string currentPlayer;
     public int currentLevel = 1;
+    public int currentScore = 0;
 
     public void SaveScore(string m_playerName, int m_highScore)
     {

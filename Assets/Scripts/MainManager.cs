@@ -14,6 +14,7 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public Text HighScoreText;
+    public Text LevelText;
     public GameObject GameOverText;
 
     private bool m_Started = false;
@@ -37,11 +38,13 @@ public class MainManager : MonoBehaviour
             PlayerName = PersistManager.Instance.PlayerName;
             HighScore = PersistManager.Instance.HighScore;
             SetHighScore();
-            AddPoint(0);
+            m_Points = 0;
+            AddPoint(PersistManager.Instance.currentScore);
             currentLevel = PersistManager.Instance.currentLevel;
+            LevelText.text = $"Level {currentLevel}";
+            // ABSTRACTION
+            LoadLevel();
         }
-        // ABSTRACTION
-        LoadLevel();
     }
 
     string[][] readFile(string file) {
@@ -74,10 +77,23 @@ public class MainManager : MonoBehaviour
 
                 Vector3 position = new Vector3(-1.5f + step * x, 2.5f + (rows - y - 1) * 0.3f, 0);
                 GameObject go = Instantiate(BrickPrefab, position, Quaternion.identity);
+                // INHERITANCE with factory of bricks
                 BaseBrick brick = factory.GetBrick(newLevel[y][x], go);
                 brick.onDestroyed += (hit) => AddPoint(hit);
             }
         }
+    }
+
+    // ABSTRACTION
+    private void KickOff()
+    {
+        m_Started = true;
+        float randomDirection = Random.Range(-1.0f, 1.0f);
+        Vector3 forceDir = new Vector3(randomDirection, 1, 0);
+        forceDir.Normalize();
+
+        Ball.transform.SetParent(null);
+        Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
     }
 
     private void Update()
@@ -86,13 +102,7 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                m_Started = true;
-                float randomDirection = Random.Range(-1.0f, 1.0f);
-                Vector3 forceDir = new Vector3(randomDirection, 1, 0);
-                forceDir.Normalize();
-
-                Ball.transform.SetParent(null);
-                Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                KickOff();
             }
         }
         else if (m_GameOver)
@@ -120,26 +130,34 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+        bool m_Finished = false;
 
         // GameObject.FindAll bricks if null or 0 next, game over
+        GameObject[] allBricks = GameObject.FindGameObjectsWithTag("Brick");
+        m_Finished = allBricks.Length == 0 ? true : false;
 
-        PersistManager.Instance.currentLevel++;
-        currentLevel = PersistManager.Instance.currentLevel;
-        if (currentLevel > 2) {
+        currentLevel++;
+        if (currentLevel > 2 || !m_Finished) {
             PersistManager.Instance.currentLevel = 1;
             currentLevel = 1;
             GameOverText.GetComponent<Text>().text = "GAME OVER\nPress Space to Restart";
+
+            if (m_Points >= HighScore) {
+                PlayerName = currentPlayer;
+                HighScore = m_Points;
+            }
+
+            PersistManager.Instance.currentScore = 0;
+            PersistManager.Instance.SaveScore(currentPlayer, m_Points);
+            SetHighScore();
+
         } else {
+            PersistManager.Instance.currentLevel++;
+            PersistManager.Instance.currentScore = m_Points;
             GameOverText.GetComponent<Text>().text = $"Level{currentLevel} Cleared!\nPress Space for next";
         }
 
         GameOverText.SetActive(true);
-        if (m_Points >= HighScore) {
-            PlayerName = currentPlayer;
-            HighScore = m_Points;
-        }
-        PersistManager.Instance.SaveScore(currentPlayer, m_Points);
-        SetHighScore();
     }
 
     public void Exit() {

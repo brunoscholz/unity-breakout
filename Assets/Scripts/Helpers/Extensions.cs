@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 public static class Extensions
 {
+    // POLYMORPHISM
     public static Component AddBrickComponent(this GameObject gameObject, System.Type aType)
     {
         var brick = gameObject.AddComponent(aType);
@@ -15,6 +16,7 @@ public static class Extensions
         return null;
     }
 
+    // POLYMORPHISM
     public static T AddBrickComponent<T>(this GameObject gameObject) where T : BaseBrick
     {
         BaseBrick brick = gameObject.AddComponent<T>();
